@@ -1,0 +1,15 @@
+:root {
+  --navy: #172339;
+  --lime: #c5ef76;
+  --focus: #3154b0;
+  --background: #f5f7f9;
+  --surface: #ffffff;
+  --soft: #f1f4f7;
+  --ink: #19263c;
+  --secondary: #5b687b;
+  --border: #e0e6ec;
+  --border-strong: #d0d9e3;
+  --orange: #cc4919;
+  --danger: #a43d24;
+  color-scheme: light;
+}

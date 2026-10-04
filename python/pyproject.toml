@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "prooflane"
+version = "1.0.0"
+description = "Local image change review with deterministic regions and CI thresholds"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Farzam Fattahi"}]
+dependencies = ["numpy>=1.24,<3", "Pillow>=10,<13"]
+
+[project.scripts]
+prooflane = "prooflane.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

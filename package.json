@@ -1,0 +1,38 @@
+{
+  "name": "prooflane",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Private visual change review, from screenshots to a portable evidence report.",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5186",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4186",
+    "test": "vitest run src",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@fontsource-variable/geist": "^5.2.0",
+    "@fontsource-variable/geist-mono": "^5.2.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "prettier": "^3.9.9",
+    "typescript": "~5.9.3",
+    "vite": "^7.2.0",
+    "vitest": "^4.1.11"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}
