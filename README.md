@@ -1,3 +1,5 @@
+[![Prooflane — private screenshot comparison. See the change. Make the call.](docs/assets/banner.png)](https://farzamfattahi.github.io/prooflane/)
+
 # Prooflane
 
 [![Validate and deploy](https://github.com/FarzamFattahi/prooflane/actions/workflows/ci.yml/badge.svg)](https://github.com/FarzamFattahi/prooflane/actions/workflows/ci.yml) [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -8,7 +10,49 @@ Prooflane is a browser-based workspace for designers, developers, and QA reviewe
 
 [Open the app](https://farzamfattahi.github.io/prooflane/) · [Report an issue](https://github.com/farzamfattahi/prooflane/issues) · [Comparison contract](docs/CONTRACT.md)
 
-![Prooflane comparison workspace](docs/assets/workspace.png)
+## See the comparison in action
+
+The built-in checkout example uses two **1,120 × 730** screenshots. The candidate changes the checkout button color, introduces a shipping charge, updates the total, and changes the dispatch estimate.
+
+<table>
+  <tr><th>1. Baseline — before</th><th>2. Candidate — after</th></tr>
+  <tr>
+    <td width="50%"><img src="docs/examples/checkout/baseline.png" alt="Baseline checkout: free shipping, $84 total, green checkout button, and dispatch within 1–2 business days." /></td>
+    <td width="50%"><img src="docs/examples/checkout/candidate.png" alt="Candidate checkout: $12 shipping, $96 total, terracotta checkout button, and dispatch within 3–5 business days." /></td>
+  </tr>
+</table>
+
+**3. Inspect the changed pixels.** Orange pixels exceed the color tolerance; unchanged pixels appear in grayscale. Numbered boxes group nearby changes for review. The blue box marks the currently selected region.
+
+![Actual Prooflane difference view of the two checkout screenshots, showing four change regions](docs/examples/checkout/workspace-difference.png)
+
+At **8% color tolerance** with an **8-pixel minimum region size**, the real comparison finds **15,793 changed pixels out of 817,600 (1.93%)**, grouped into **4 regions**. The color tolerance measures RGB distance; it is not a confidence score.
+
+| Region | Visible change                      | Changed pixels |
+| ------ | ----------------------------------- | -------------: |
+| 01     | Checkout button: green → terracotta |         15,169 |
+| 02     | Shipping: Free → $12.00             |            331 |
+| 03     | Total: $84.00 → $96.00              |            188 |
+| 04     | Dispatch: 1–2 → 3–5 business days   |            105 |
+
+<table>
+  <tr><th>Region 01 — before</th><th>Region 01 — after</th></tr>
+  <tr>
+    <td width="50%"><img src="docs/examples/checkout/detail-before.png" alt="Close-up of the original green checkout button." /></td>
+    <td width="50%"><img src="docs/examples/checkout/detail-after.png" alt="Close-up of the changed terracotta checkout button." /></td>
+  </tr>
+</table>
+
+**4. Make the call.** Select a region, mark it **Expected** or **Needs fix**, and add a note. Prooflane detects the visual difference; the reviewer decides whether it is correct. Export the review as a self-contained HTML report for someone else to inspect offline.
+
+[Open the raw difference PNG](docs/examples/checkout/difference.png) · [Inspect the actual JSON output](docs/examples/checkout/comparison.json) · [Reproduce this example](docs/examples/checkout/README.md)
+
+<details>
+<summary>Full review workspace</summary>
+
+![Prooflane comparison workspace with a review decision and note](docs/assets/workspace.png)
+
+</details>
 
 ## A useful review loop
 
