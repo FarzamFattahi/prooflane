@@ -5,6 +5,7 @@ playwright-report/
 .ruflo/
 .swarm/
 .claude-flow/
+/ruvector.db*
 .env*
 !.env.example
 __pycache__/
