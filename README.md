@@ -10,42 +10,41 @@ Prooflane is a browser-based workspace for designers, developers, and QA reviewe
 
 [Open the app](https://farzamfattahi.github.io/prooflane/) · [Report an issue](https://github.com/farzamfattahi/prooflane/issues) · [Comparison contract](docs/CONTRACT.md)
 
-## See the comparison in action
+## Your workers example: find the edited pixels
 
-The built-in checkout example uses two **1,120 × 730** screenshots. The candidate changes the checkout button color, introduces a shipping charge, updates the total, and changes the dispatch estimate.
-
-<table>
-  <tr><th>1. Baseline — before</th><th>2. Candidate — after</th></tr>
-  <tr>
-    <td width="50%"><img src="docs/examples/checkout/baseline.png" alt="Baseline checkout: free shipping, $84 total, green checkout button, and dispatch within 1–2 business days." /></td>
-    <td width="50%"><img src="docs/examples/checkout/candidate.png" alt="Candidate checkout: $12 shipping, $96 total, terracotta checkout button, and dispatch within 3–5 business days." /></td>
-  </tr>
-</table>
-
-**3. Inspect the changed pixels.** Orange pixels exceed the color tolerance; unchanged pixels appear in grayscale. Numbered boxes group nearby changes for review. The blue box marks the currently selected region.
-
-![Actual Prooflane difference view of the two checkout screenshots, showing four change regions](docs/examples/checkout/workspace-difference.png)
-
-At **8% color tolerance** with an **8-pixel minimum region size**, the real comparison finds **15,793 changed pixels out of 817,600 (1.93%)**, grouped into **4 regions**. The color tolerance measures RGB distance; it is not a confidence score.
-
-| Region | Visible change                      | Changed pixels |
-| ------ | ----------------------------------- | -------------: |
-| 01     | Checkout button: green → terracotta |         15,169 |
-| 02     | Shipping: Free → $12.00             |            331 |
-| 03     | Total: $84.00 → $96.00              |            188 |
-| 04     | Dispatch: 1–2 → 3–5 business days   |            105 |
+These are Farzam's two supplied **980 × 980** construction-worker images. The baseline is the original; the candidate contains painted edits. Prooflane compares the actual pixels; it does not recognize workers or assess construction safety.
 
 <table>
-  <tr><th>Region 01 — before</th><th>Region 01 — after</th></tr>
-  <tr>
-    <td width="50%"><img src="docs/examples/checkout/detail-before.png" alt="Close-up of the original green checkout button." /></td>
-    <td width="50%"><img src="docs/examples/checkout/detail-after.png" alt="Close-up of the changed terracotta checkout button." /></td>
-  </tr>
+<tr><th>Original — baseline</th><th>Edited — candidate</th></tr>
+<tr><td width="50%"><img src="docs/examples/workers/baseline.jpg" alt="Original construction workers photograph" /></td><td width="50%"><img src="docs/examples/workers/candidate.jpg" alt="Same workers photograph with painted changes on helmets, clothing and construction formwork" /></td></tr>
 </table>
 
-**4. Make the call.** Select a region, mark it **Expected** or **Needs fix**, and add a note. Prooflane detects the visual difference; the reviewer decides whether it is correct. Export the review as a self-contained HTML report for someone else to inspect offline.
+### What Prooflane detects
 
-[Open the raw difference PNG](docs/examples/checkout/difference.png) · [Inspect the actual JSON output](docs/examples/checkout/comparison.json) · [Reproduce this example](docs/examples/checkout/README.md)
+![Actual difference view of Farzam's workers images](docs/examples/workers/workspace-difference.png)
+
+At **8% color tolerance** and an **8-pixel minimum region size**, the comparison detects **2,620 changed pixels out of 960,400 (0.273%)**, grouped into **seven regions**. Orange pixels exceed the tolerance; grayscale provides unchanged context. Numbered boxes group changes, and blue marks the selected region. Coordinates start at the top-left corner.
+
+| Region | Top-left (x, y) | Bounds (pixels) | Changed pixels |
+| ------ | --------------- | --------------- | -------------: |
+| 01     | (729, 625)      | 61 × 50         |          1,090 |
+| 02     | (248, 383)      | 46 × 28         |            685 |
+| 03     | (781, 191)      | 12 × 45         |            296 |
+| 04     | (374, 278)      | 24 × 14         |            187 |
+| 05     | (279, 598)      | 35 × 18         |            186 |
+| 06     | (268, 823)      | 14 × 9          |             95 |
+| 07     | (261, 626)      | 11 × 26         |             81 |
+
+The largest region is the painted edit on the lower-right worker's helmet. Other regions include the foreground worker's vest and orange marks on the formwork. The small black and blue edits are not all retained at the default tolerance: nearby dark colors can fall below it. Lower the tolerance to inspect subtler changes; a minimum region size filters displayed regions, not total statistics.
+
+<table>
+<tr><th>Selected helmet region — original</th><th>Selected helmet region — edited</th></tr>
+<tr><td width="50%"><img src="docs/examples/workers/detail-before.png" alt="Original helmet close-up" /></td><td width="50%"><img src="docs/examples/workers/detail-after.png" alt="Edited helmet close-up" /></td></tr>
+</table>
+
+Select a region, record **Expected** or **Needs fix**, add a note, and export a portable report. The reviewer decides whether the detected change is correct.
+
+[Difference PNG](docs/examples/workers/difference.png) · [Actual browser JSON](docs/examples/workers/comparison.json) · [Reproduce with Python](docs/examples/workers/README.md)
 
 <details>
 <summary>Full review workspace</summary>
@@ -97,20 +96,33 @@ npm run preview
 
 The production site uses the `/prooflane/` base path and is available locally at `http://127.0.0.1:4186/prooflane/`.
 
-## Python CLI
+## Python library and CLI
 
-The Python implementation supports repeatable file-based comparisons outside the browser. Install it from [the Python package](python/) in a virtual environment:
+Install the portable Python package directly from the [v1.1.0 release](https://github.com/FarzamFattahi/prooflane/releases/tag/v1.1.0):
 
 ```sh
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS / Linux: source .venv/bin/activate
-python -m pip install -e ./python
-prooflane baseline.png candidate.png --output report.json --diff diff.png
-prooflane baseline.png candidate.png --fail-above 0.5
+python -m pip install https://github.com/FarzamFattahi/prooflane/releases/download/v1.1.0/prooflane-1.1.0-py3-none-any.whl
 ```
 
-See [the Python README](python/README.md) for commands, output formats, and exit-code behavior.
+```python
+from prooflane import compare, render_difference, save_report
+
+result = compare("original.jpg", "edited.jpg")
+print(f"{result.changedPercent:.3f}% changed")
+for region in result.regions:
+    print(region.x, region.y, region.width, region.height, region.pixels)
+render_difference("edited.jpg", result).save("difference.png")
+save_report(result, "report.json")
+```
+
+Accepts file paths, Pillow images, and NumPy uint8 grayscale/RGB/RGBA arrays. Use `result.mask` for segmentation-style integration, `Rect` exclusions for dynamic areas, and threshold settings for your application. OpenCV arrays must be converted from BGR to RGB first.
+
+```sh
+prooflane original.jpg edited.jpg --output report.json --diff difference.png
+prooflane original.jpg edited.jpg --fail-above 0.5
+```
+
+See [the Python API guide](python/README.md) for installation, options, CI integration, and the comparison contract. No API key, GPU, or server is required.
 
 ## Comparison rules and limitations
 

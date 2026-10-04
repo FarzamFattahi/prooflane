@@ -8,10 +8,10 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError
 
-from .engine import MAX_PIXELS, MAX_SIDE, Rect, compare_images
+from .engine import Rect, compare_images
+from .api import load_image, render_difference
 
 
 def _ignore(value: str) -> Rect:
@@ -24,27 +24,6 @@ def _ignore(value: str) -> Rect:
         return rectangle
     except ValueError as exc:
         raise argparse.ArgumentTypeError(f"Invalid --ignore {value!r}: {exc}") from exc
-
-
-def _load(path: Path) -> Image.Image:
-    with Image.open(path) as image:
-        width, height = image.size
-        if width < 1 or height < 1 or max(width, height) > MAX_SIDE or width * height > MAX_PIXELS:
-            raise ValueError(f"{path.name}: dimensions exceed comparison limits")
-        if getattr(image, "n_frames", 1) != 1:
-            raise ValueError(f"{path.name}: animated/multi-frame inputs are unsupported; export one frame")
-        # Browser decoders honor EXIF orientation; normalize before comparison.
-        return ImageOps.exif_transpose(image).convert("RGBA")
-
-
-def _diff(candidate: Image.Image, mask: np.ndarray) -> Image.Image:
-    height, width = mask.shape
-    canvas = Image.new("RGBA", (width, height), (255, 255, 255, 255))
-    canvas.alpha_composite(candidate, (0, 0))
-    rgba = np.asarray(canvas).copy()
-    changed = mask.astype(bool)
-    rgba[changed, :3] = np.rint(rgba[changed, :3] * 0.35 + np.array([246, 71, 104]) * 0.65).astype(np.uint8)
-    return Image.fromarray(rgba)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -67,7 +46,7 @@ def main(argv: list[str] | None = None) -> int:
             raise ValueError("Output paths must differ from both input paths")
         if len(outputs) != len(set(outputs)):
             raise ValueError("JSON report and diff PNG need separate output paths")
-        baseline, candidate = _load(args.baseline), _load(args.candidate)
+        baseline, candidate = load_image(args.baseline), load_image(args.candidate)
         result = compare_images(baseline, candidate, threshold=args.threshold,
                                 min_region_pixels=args.min_region_pixels, ignores=args.ignore)
         report = result.to_dict()
@@ -80,7 +59,7 @@ def main(argv: list[str] | None = None) -> int:
         })
         payload = json.dumps(report, indent=2, allow_nan=False) + "\n"
         if args.diff:
-            _diff(candidate, result.mask).save(args.diff, format="PNG")
+            render_difference(candidate, result).save(args.diff, format="PNG")
         if args.output:
             args.output.write_text(payload, encoding="utf-8")
             print(f"{result.changedPixels:,} / {result.comparedPixels:,} pixels changed ({result.changedPercent:.4f}%). Report: {args.output}", file=sys.stderr)

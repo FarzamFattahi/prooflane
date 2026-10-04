@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "engine": "prooflane-rgb-v1",
+  "createdAt": "2026-10-04T17:44:26.127Z",
+  "baseline": {
+    "name": "hhardworking-construction-workers-building-on-a-construction-site-photo.jpg",
+    "width": 980,
+    "height": 980,
+    "rgbaSha256": "e4b8a702603b45f630386f50e27731336d9c26e9c752cc86fe08abd90226e8ca"
+  },
+  "candidate": {
+    "name": "hardworking-construction-workers-building-on-a-construction-site-photo.jpg",
+    "width": 980,
+    "height": 980,
+    "rgbaSha256": "b9b53774a67fc272376a0ec8fef95e831be79af42b663f0c0ab18b5042dc9bd0"
+  },
+  "options": {
+    "threshold": 0.08,
+    "minRegionPixels": 8,
+    "ignores": []
+  },
+  "summary": {
+    "width": 980,
+    "height": 980,
+    "changedPixels": 2620,
+    "comparedPixels": 960400,
+    "ignoredPixels": 0,
+    "changedPercent": 0.2728029987505206,
+    "omittedRegions": 0,
+    "omittedPixels": 0
+  },
+  "regions": [
+    {
+      "id": "r-729-625-61-50",
+      "x": 729,
+      "y": 625,
+      "width": 61,
+      "height": 50,
+      "pixels": 1090,
+      "decision": "unreviewed",
+      "note": ""
+    },
+    {
+      "id": "r-248-383-46-28",
+      "x": 248,
+      "y": 383,
+      "width": 46,
+      "height": 28,
+      "pixels": 685,
+      "decision": "unreviewed",
+      "note": ""
+    },
+    {
+      "id": "r-781-191-12-45",
+      "x": 781,
+      "y": 191,
+      "width": 12,
+      "height": 45,
+      "pixels": 296,
+      "decision": "unreviewed",
+      "note": ""
+    },
+    {
+      "id": "r-374-278-24-14",
+      "x": 374,
+      "y": 278,
+      "width": 24,
+      "height": 14,
+      "pixels": 187,
+      "decision": "unreviewed",
+      "note": ""
+    },
+    {
+      "id": "r-279-598-35-18",
+      "x": 279,
+      "y": 598,
+      "width": 35,
+      "height": 18,
+      "pixels": 186,
+      "decision": "unreviewed",
+      "note": ""
+    },
+    {
+      "id": "r-268-823-14-9",
+      "x": 268,
+      "y": 823,
+      "width": 14,
+      "height": 9,
+      "pixels": 95,
+      "decision": "unreviewed",
+      "note": ""
+    },
+    {
+      "id": "r-261-626-11-26",
+      "x": 261,
+      "y": 626,
+      "width": 11,
+      "height": 26,
+      "pixels": 81,
+      "decision": "unreviewed",
+      "note": ""
+    }
+  ],
+  "methodology": "RGBA composited on white; weighted RGB RMS distance; no resizing. 16px tiles, 8-neighbor region grouping. Pixels outside either image count as changed. Filtered regions remain in changed-pixel totals. Visual difference is not a judgment of correctness."
+}

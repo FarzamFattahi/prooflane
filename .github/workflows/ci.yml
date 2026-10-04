@@ -35,6 +35,22 @@ jobs:
         run: python -m pip install -e ./python
       - name: Run Python tests against shared fixtures
         run: python -m unittest discover -s python/tests -v
+      - name: Build Python wheel and source distribution
+        run: |
+          python -m pip install build twine
+          python -m build python --outdir package-dist
+          python -m twine check package-dist/*
+      - name: Verify installed wheel public API
+        run: |
+          python -m venv /tmp/prooflane-wheel
+          /tmp/prooflane-wheel/bin/pip install package-dist/*.whl
+          cd /tmp
+          /tmp/prooflane-wheel/bin/python -c "import numpy as np; from prooflane import compare; a=np.zeros((2,2,3), dtype=np.uint8); assert compare(a,a).changedPixels == 0"
+      - name: Save Python distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package
+          path: package-dist/*
       - name: Save browser failure evidence
         if: failure()
         uses: actions/upload-artifact@v4

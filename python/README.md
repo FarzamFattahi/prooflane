@@ -4,7 +4,13 @@ Compare image revisions locally, generate exact change statistics, and fail a CI
 
 ## Install and run
 
-Requires Python 3.10 or newer. From this directory:
+Requires Python 3.10 or newer. Install the released wheel:
+
+```sh
+python -m pip install https://github.com/FarzamFattahi/prooflane/releases/download/v1.1.0/prooflane-1.1.0-py3-none-any.whl
+```
+
+Or install from this directory:
 
 ```sh
 python -m pip install .
@@ -19,19 +25,44 @@ Exit codes: **0** for success within the optional budget, **1** if `changedPerce
 ## Python API
 
 ```python
-from PIL import Image
-from prooflane import Rect, compare_images
+from prooflane import Rect, compare, render_difference, save_report
 
-with Image.open("before.png") as before, Image.open("after.png") as after:
-    result = compare_images(before, after, ignores=[Rect(0, 0, 200, 50)])
+result = compare("before.png", "after.png", threshold=0.08,
+                 min_region_pixels=8, ignores=[Rect(0, 0, 200, 50)])
 print(result.changedPercent)
 for region in result.regions:
-    print(region.id, region.pixels)
-report = result.to_dict()
-mask = result.mask  # H×W uint8 array: 1 changed, 0 unchanged or ignored
+    print(region.id, region.x, region.y, region.width, region.height, region.pixels)
+render_difference("after.png", result).save("difference.png")
+save_report(result, "report.json")
+mask = result.mask  # H×W uint8: 1 changed; 0 unchanged/ignored
 ```
 
-The API also accepts `numpy.uint8` RGBA arrays shaped `(height, width, 4)`. The CLI normalizes EXIF orientation during decoding; the API expects already oriented images.
+`compare(baseline, candidate, *, threshold=0.08, min_region_pixels=8, ignores=())` accepts paths (`str` or `Path`), Pillow images, or NumPy uint8 grayscale H×W, RGB H×W×3, and RGBA H×W×4 arrays. Inputs may have different types and sizes. Arrays are RGB: convert OpenCV BGR via `cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)`. Inputs are not modified. File handles are closed before returning, EXIF orientation is normalized, and animated inputs are rejected.
+
+`load_image(source)` returns an owned Pillow RGBA image using the same normalization. `render_difference(candidate, result)` returns a Pillow image; pass the same candidate used in the comparison. `save_report(result, path, include_mask=False)` writes JSON; parent folders must exist and existing output files are replaced. `result.to_dict()` returns statistics without writing files. `include_mask=True` adds a flattened mask and may make reports large.
+
+`Comparison` exposes width, height, changedPixels, comparedPixels, ignoredPixels, changedPercent, regions, omittedRegions, omittedPixels, mask, and durationMs. `Rect(x, y, width, height)` defines exclusions. Each `Region` has id, x, y, width, height, and pixels. Camel-case statistics match the browser JSON contract. Type hints and `py.typed` are included.
+
+The lower-level `compare_images` remains available for already-oriented Pillow images or uint8 RGBA arrays. It intentionally does not normalize EXIF orientation.
+
+### NumPy integration and CI
+
+```python
+import numpy as np
+from prooflane import compare
+
+before = np.full((100, 100, 3), 255, dtype=np.uint8)
+after = before.copy()
+after[10:20, 30:40] = 0
+result = compare(before, after)
+assert result.changedPixels == 100
+assert result.changedPercent == 1.0
+# In your screenshot regression job:
+if result.changedPercent > 0.5:
+    raise SystemExit("Visual change budget exceeded")
+```
+
+Errors raise `ValueError` for unsupported arrays/options/dimensions or multi-frame images, `TypeError` for unsupported source types, and Pillow/OSError exceptions for unreadable files. The CLI converts these to exit code 2. Reports are engine output; browser review decisions and interactive HTML handoffs belong to the browser application.
 
 ## What is measured
 
